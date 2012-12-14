@@ -22,8 +22,8 @@
 
 !function ($) {
 
-    // Picker object
-
+/* DatePicker Object 
+ * ================= */
     var Datepicker = function (element, options) {
         
         //Setup basic properties / configuration
@@ -32,7 +32,6 @@
         this.picker = $(DPGlobal.template)
 							.appendTo('body')
 							.on({
-							    click: $.proxy(this.click, this),
 							    mousedown: $.proxy(this.mousedown, this)
 							});
         this.isInput = this.element.is('input');
@@ -40,8 +39,14 @@
         this.weekStart = options.weekStart || this.element.data('date-weekstart') || 0;
         this.weekEnd = this.weekStart === 0 ? 6 : this.weekStart - 1;
         
+        //Bind Event handlers
+        //'Switcher' Click
+        self = this;        
+        this.picker.find('.switchRow th').each(function(i, e) {
+            $(e).on('click', $.proxy(self.clickSwitch, self));
+        });
 
-        //Establish the 'Show' onClick events
+        //'Show' Click
         if (this.isInput) {
             this.element.on({
                 focus: $.proxy(this.show, this),
@@ -94,15 +99,18 @@
         this.showMode();
     };
 
+/* DatePicker functionality
+ * ======================== */
     Datepicker.prototype = {
         constructor: Datepicker,
 
         show: function (e) {
-            console.log("Show() Running");
+            
             this.picker.show();
             this.height = this.component ? this.component.outerHeight() : this.element.outerHeight();
             this.place();
             $(window).on('resize', $.proxy(this.place, this));
+            
             if (e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -110,6 +118,7 @@
             if (!this.isInput) {
                 $(document).on('mousedown', $.proxy(this.hide, this));
             }
+            
             this.element.trigger({
                 type: 'show',
                 date: this.date
@@ -117,7 +126,7 @@
         },
 
         hide: function () {
-            console.log("Hide() Running");
+            
             this.picker.hide();
             $(window).off('resize', this.place);
             this.viewMode = this.startViewMode;
@@ -125,7 +134,7 @@
             if (!this.isInput) {
                 $(document).off('mousedown', this.hide);
             }
-            //this.set();
+            
             this.element.trigger({
                 type: 'hide',
                 date: this.date
@@ -133,7 +142,7 @@
         },
 
         set: function () {
-            console.log("Set() Running");
+            
             var formated = DPGlobal.formatDate(this.date, this.format);
             if (!this.isInput) {
                 if (this.component) {
@@ -146,7 +155,7 @@
         },
 
         setValue: function (newDate) {
-            console.log("SetValue() Running");
+            
             if (typeof newDate === 'string') {
                 this.date = DPGlobal.parseDate(newDate, this.format);
             } else {
@@ -166,7 +175,7 @@
         },
 
         update: function (newDate) {
-            console.log("Update() Running");
+            
             this.date = DPGlobal.parseDate(
 				typeof newDate === 'string' ? newDate : (this.isInput ? this.element.prop('value') : this.element.data('date')),
 				this.format
@@ -175,6 +184,7 @@
             this.fill();
         },
 
+        ///Content Generation
         fillDow: function () {
             var dowCnt = this.weekStart;
             var html = '<tr>';
@@ -197,43 +207,23 @@
             }
         },
 
-        clickMonth: function (e) {
-            
-            this.viewDate.setMonth($(e.target).data('month'));
-            this.showMode(-1);
-            this.fill();
-
-
-            console.log("data-month reads as " + $(e.target).data('month'));
-            console.log("Running clickMonth");
-            //
-        },
-
-        clickYear: function (e) {
-
-            this.viewDate.setFullYear($(e.target).data('year'));
-            this.showMode(-1);
-            this.fill();
-
-            console.log("Running clickYear");
-        },
-
         fill: function () {
             var d = new Date(this.viewDate),
 				year = d.getFullYear(),
 				month = d.getMonth(),
 				currentDate = this.date.valueOf();
 
-            this.picker.find('.datepicker-days th:eq(1)')
-						.text(DPGlobal.dates.months[month] + ' ' + year);
+            switcher = this.picker.find('.datepicker-days th:eq(1)').text(DPGlobal.dates.months[month] + ' ' + year);
 
             var prevMonth = new Date(year, month - 1, 28, 0, 0, 0, 0),
 				day = DPGlobal.getDaysInMonth(prevMonth.getFullYear(), prevMonth.getMonth());
             prevMonth.setDate(day);
             prevMonth.setDate(day - (prevMonth.getDay() - this.weekStart + 7) % 7);
+            
             var nextMonth = new Date(prevMonth);
             nextMonth.setDate(nextMonth.getDate() + 42);
             nextMonth = nextMonth.valueOf();
+            
             html = [];
             var clsName;
             while (prevMonth.valueOf() < nextMonth) {
@@ -255,114 +245,140 @@
                 }
                 prevMonth.setDate(prevMonth.getDate() + 1);
             }
+            
             this.picker.find('.datepicker-days tbody').empty().append(html.join(''));
-            var currentYear = this.date.getFullYear();
 
+            //Add onClick to each cell
+            self = this;
+            this.picker.find('.datepicker-days tbody td').each(function(i,e) {
+                $(e).on('click', $.proxy(self.clickCell, self));
+            });
+
+            //Sort out the Active month
             var months = this.picker.find('.datepicker-months')
 						.find('th:eq(1)')
 							.text(year)
 							.end()
 						.find('span').removeClass('active');
+            
+            var currentYear = this.date.getFullYear();
             if (currentYear === year) {
                 months.eq(this.date.getMonth()).addClass('active');
             }
-
-            html = '';
+            
+            //Rebuild the table of Years
+            //Find the current table and clear it
             year = parseInt(year / 10, 10) * 10;
             var yearCont = this.picker.find('.datepicker-years')
 								.find('th:eq(1)')
 									.text(year + '-' + (year + 9))
 									.end()
 								.find('td');
+            yearCont.empty();
+
+            //And generate the new content
             year -= 1;
             for (var i = -1; i < 11; i++) {
-                html += '<span class="year' + (i === -1 || i === 10 ? ' old' : '') + (currentYear === year ? ' active' : '') + '">' + year + '</span>';
+
+                var html = $('<span class="year' + (i === -1 || i === 10 ? ' old' : '') 
+                    + (currentYear === year ? ' active' : '') + '" data-year="' + year + '">' + year + '</span>');
+                html.on('click', $.proxy(this.clickYear, this));
+
+                yearCont.append(html);
+
                 year += 1;
             }
-            yearCont.html(html);
         },
 
-
-        click: function (e) {
-            console.log("Click Running");
-            e.stopPropagation();
-            e.preventDefault();
-            var target = $(e.target).closest('span, td, th');
-            if (target.length === 1) {
-                switch (target[0].nodeName.toLowerCase()) {
-                    case 'th':
-                        console.log("Click for th");
-                        switch (target[0].className) {
-                            case 'switch':
-                                this.showMode(1);
-                                break;
-                            case 'prev':
-                            case 'next':
-                                this.viewDate['set' + DPGlobal.modes[this.viewMode].navFnc].call(
-									this.viewDate,
-									this.viewDate['get' + DPGlobal.modes[this.viewMode].navFnc].call(this.viewDate) +
-									DPGlobal.modes[this.viewMode].navStep * (target[0].className === 'prev' ? -1 : 1)
-								);
-                                this.fill();
-                                //this.set();
-                                break;
-                        }
-                        break;
-                        /*
-                    case 'span':
-                        console.log("Span");
-                        if (target.is('.month')) {
-                            //var month = target.parent().find('span').index(target);
-                            //this.viewDate.setMonth(month);
-                        } else {
-                            var year = parseInt(target.text(), 10) || 0;
-                            this.viewDate.setFullYear(year);
-                        }
-                        if (this.viewMode !== 0) {
-                            this.date = new Date(this.viewDate);
-                            this.element.trigger({
-                                type: 'changeDate',
-                                date: this.date,
-                                viewMode: DPGlobal.modes[this.viewMode].clsName
-                            });
-                        }
-                        this.showMode(-1);
-                        this.fill();
-                        //this.set();
-                        break;*/
-                    case 'td':
-                        console.log("Click for td");
-                        if (target.is('.day')) {
-                            var day = parseInt(target.text(), 10) || 1;
-                            var month = this.viewDate.getMonth();
-                            if (target.is('.old')) {
-                                month -= 1;
-                            } else if (target.is('.new')) {
-                                month += 1;
-                            }
-                            var year = this.viewDate.getFullYear();
-                            this.date = new Date(year, month, day, 0, 0, 0, 0);
-                            this.viewDate = new Date(year, month, Math.min(28, day), 0, 0, 0, 0);
-                            this.fill();
-                            this.set();
-                            this.element.trigger({
-                                type: 'changeDate',
-                                date: this.date,
-                                viewMode: DPGlobal.modes[this.viewMode].clsName
-                            });
-                            if (this.isInput) {
-                                this.element.blur();
-                            } else {
-                                this.hide();
-                            }
-                        }
-                        break;
+        ///Event Handlers
+        clickMonth: function (e) {
+            
+            this.viewDate.setMonth($(e.target).data('month'));
+            
+            //If picker is set to 'Month Only', set value of the input to this selection
+            if (this.viewMode !== 0 && this.minViewMode > 0) {
+                this.date = new Date(this.viewDate);
+                this.element.trigger({
+                    type: 'changeDate',
+                    date: this.date,
+                    viewMode: DPGlobal.modes[this.viewMode].clsName
+                });
+                
+                this.set();
+                
+                if (this.isInput) {
+                    this.element.blur();
+                } else {
+                    this.hide();
                 }
+            } else {
+                this.showMode(-1);
+                this.fill();
+            }
+        },
+
+        clickYear: function (e) {
+
+            var year = parseInt($(e.target).data('year'), 10) || 0;                            
+            this.viewDate.setFullYear(year);
+            this.showMode(-1);
+            this.fill();
+
+        },
+
+        clickSwitch: function(e) {
+            
+            switch (e.target.className) {
+                case 'switch':
+                    this.showMode(1);
+                    break;
+                case 'prev':
+                case 'next':
+                    this.viewDate['set' + DPGlobal.modes[this.viewMode].navFnc].call(
+                        this.viewDate,
+                        this.viewDate['get' + DPGlobal.modes[this.viewMode].navFnc].call(this.viewDate) +
+                        DPGlobal.modes[this.viewMode].navStep * (e.target.className === 'prev' ? -1 : 1)
+                    );
+
+                    this.fill();
+                    break;
+            }
+
+        },
+
+        clickCell: function(e) { 
+            
+            var cell = $(e.target);
+            var day = parseInt(cell.text(), 10) || 1;
+            var month = this.viewDate.getMonth();
+            var year = this.viewDate.getFullYear();
+
+            if (cell.is('.old')) {
+                month -= 1;
+            } else if (cell.is('.new')) {
+                month += 1;
+            }
+            
+            this.date = new Date(year, month, day, 0, 0, 0, 0);
+            this.viewDate = new Date(year, month, Math.min(28, day), 0, 0, 0, 0);
+            
+            this.fill();
+            this.set();
+            
+            this.element.trigger({
+                type: 'changeDate',
+                date: this.date,
+                viewMode: DPGlobal.modes[this.viewMode].clsName
+            });
+            
+            if (this.isInput) {
+                this.element.blur();
+            } else {
+                this.hide();
             }
         },
 
         mousedown: function (e) {
-            console.log("mousedown() Running");
             e.stopPropagation();
             e.preventDefault();
         },
@@ -388,9 +404,10 @@
     };
 
     $.fn.datepicker.defaults = { };
-
     $.fn.datepicker.Constructor = Datepicker;
 
+/* Configuration Object & Utility methods
+ * =============================== */
     var DPGlobal = {
         modes: [
 			{
@@ -408,6 +425,7 @@
 			    navFnc: 'FullYear',
 			    navStep: 10
 			}],
+
         dates: {
             days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
             daysShort: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -415,12 +433,15 @@
             months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
             monthsShort: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         },
+
         isLeapYear: function (year) {
             return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0))
         },
+
         getDaysInMonth: function (year, month) {
             return [31, (DPGlobal.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month]
         },
+
         parseFormat: function (format) {
             var separator = format.match(/[.\/\-\s].*?/),
 				parts = format.split(/\W+/);
@@ -429,6 +450,7 @@
             }
             return { separator: separator, parts: parts };
         },
+
         parseDate: function (date, format) {
             var parts = date.split(format.separator),
 				date = new Date(),
@@ -460,6 +482,7 @@
             }
             return date;
         },
+
         formatDate: function (date, format) {
             var val = {
                 d: date.getDate(),
@@ -475,8 +498,9 @@
             }
             return date.join(format.separator);
         },
+
         headTemplate: '<thead>' +
-							'<tr>' +
+							'<tr class="switchRow">' +
 								'<th class="prev">&lsaquo;</th>' +
 								'<th colspan="5" class="switch"></th>' +
 								'<th class="next">&rsaquo;</th>' +
@@ -484,6 +508,7 @@
 						'</thead>',
         contTemplate: '<tbody><tr><td colspan="7"></td></tr></tbody>'
     };
+
     DPGlobal.template = '<div class="datepicker dropdown-menu">' +
 							'<div class="datepicker-days">' +
 								'<table class=" table-condensed">' +
