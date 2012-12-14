@@ -25,6 +25,8 @@
     // Picker object
 
     var Datepicker = function (element, options) {
+        
+        //Setup basic properties / configuration
         this.element = $(element);
         this.format = DPGlobal.parseFormat(options.format || this.element.data('date-format') || 'mm/dd/yyyy');
         this.picker = $(DPGlobal.template)
@@ -35,7 +37,11 @@
 							});
         this.isInput = this.element.is('input');
         this.component = this.element.is('.date') ? this.element.find('.add-on') : false;
+        this.weekStart = options.weekStart || this.element.data('date-weekstart') || 0;
+        this.weekEnd = this.weekStart === 0 ? 6 : this.weekStart - 1;
+        
 
+        //Establish the 'Show' onClick events
         if (this.isInput) {
             this.element.on({
                 focus: $.proxy(this.show, this),
@@ -49,6 +55,8 @@
                 this.element.on('click', $.proxy(this.show, this));
             }
         }
+
+        //Determine the 'ViewMode' for the picker
         this.minViewMode = options.minViewMode || this.element.data('date-minviewmode') || 0;
         if (typeof this.minViewMode === 'string') {
             switch (this.minViewMode) {
@@ -78,8 +86,8 @@
             }
         }
         this.startViewMode = this.viewMode;
-        this.weekStart = options.weekStart || this.element.data('date-weekstart') || 0;
-        this.weekEnd = this.weekStart === 0 ? 6 : this.weekStart - 1;
+
+        //And build the picker
         this.fillDow();
         this.fillMonths();
         this.update();
@@ -178,12 +186,36 @@
         },
 
         fillMonths: function () {
-            var html = '';
             var i = 0
             while (i < 12) {
-                html += '<span class="month">' + DPGlobal.dates.monthsShort[i++] + '</span>';
+                var html = $('<span class="month" data-month="'+ i +'">' + DPGlobal.dates.monthsShort[i] + '</span>');
+                html.on('click', $.proxy(this.clickMonth, this));
+
+                this.picker.find('.datepicker-months td').append(html);  
+
+                i++;
             }
-            this.picker.find('.datepicker-months td').append(html);
+        },
+
+        clickMonth: function (e) {
+            
+            this.viewDate.setMonth($(e.target).data('month'));
+            this.showMode(-1);
+            this.fill();
+
+
+            console.log("data-month reads as " + $(e.target).data('month'));
+            console.log("Running clickMonth");
+            //
+        },
+
+        clickYear: function (e) {
+
+            this.viewDate.setFullYear($(e.target).data('year'));
+            this.showMode(-1);
+            this.fill();
+
+            console.log("Running clickYear");
         },
 
         fill: function () {
@@ -191,8 +223,10 @@
 				year = d.getFullYear(),
 				month = d.getMonth(),
 				currentDate = this.date.valueOf();
+
             this.picker.find('.datepicker-days th:eq(1)')
 						.text(DPGlobal.dates.months[month] + ' ' + year);
+
             var prevMonth = new Date(year, month - 1, 28, 0, 0, 0, 0),
 				day = DPGlobal.getDaysInMonth(prevMonth.getFullYear(), prevMonth.getMonth());
             prevMonth.setDate(day);
@@ -248,6 +282,7 @@
             yearCont.html(html);
         },
 
+
         click: function (e) {
             console.log("Click Running");
             e.stopPropagation();
@@ -273,11 +308,12 @@
                                 break;
                         }
                         break;
+                        /*
                     case 'span':
                         console.log("Span");
                         if (target.is('.month')) {
-                            var month = target.parent().find('span').index(target);
-                            this.viewDate.setMonth(month);
+                            //var month = target.parent().find('span').index(target);
+                            //this.viewDate.setMonth(month);
                         } else {
                             var year = parseInt(target.text(), 10) || 0;
                             this.viewDate.setFullYear(year);
@@ -293,7 +329,7 @@
                         this.showMode(-1);
                         this.fill();
                         //this.set();
-                        break;
+                        break;*/
                     case 'td':
                         console.log("Click for td");
                         if (target.is('.day')) {
@@ -351,8 +387,8 @@
         });
     };
 
-    $.fn.datepicker.defaults = {
-    };
+    $.fn.datepicker.defaults = { };
+
     $.fn.datepicker.Constructor = Datepicker;
 
     var DPGlobal = {
