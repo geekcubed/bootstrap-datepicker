@@ -17,4 +17,6 @@ The project is still under development to address the above two requirements. I 
  * Add support for selecting Time as well as date
  * Improve extensibility to support additional languages / locales.
 
+ There is an additional fork of the original source code available at https://github.com/eternicode/bootstrap-datepicker : this features extensive support for locales etc.
+
  Contributors are welcome to get in touch.
