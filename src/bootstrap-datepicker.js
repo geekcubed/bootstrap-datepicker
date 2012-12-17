@@ -38,7 +38,8 @@
         this.component = this.element.is('.date') ? this.element.find('.add-on') : false;
         this.weekStart = options.weekStart || this.element.data('date-weekstart') || 0;
         this.weekEnd = this.weekStart === 0 ? 6 : this.weekStart - 1;
-        
+        this.nullable = options.nullable || this.element.data('date-nullable') || false;
+
         //Bind Event handlers
         //'Switcher' Click
         self = this;        
@@ -60,6 +61,16 @@
                 this.element.on('click', $.proxy(this.show, this));
             }
         }
+
+        //Nullable
+        if (this.nullable == true) {
+            
+            var nullLink = $(DPGlobal.clearTemplate);
+            nullLink.on('click', $.proxy(this.clickClear, this));
+
+            this.picker.append(nullLink);
+        }
+
 
         //Determine the 'ViewMode' for the picker
         this.minViewMode = options.minViewMode || this.element.data('date-minviewmode') || 0;
@@ -143,7 +154,11 @@
 
         set: function () {
             
-            var formated = DPGlobal.formatDate(this.date, this.format);
+            var formated = '';
+            if (this.date != null) {
+                formated = DPGlobal.formatDate(this.date, this.format);
+            }
+
             if (!this.isInput) {
                 if (this.component) {
                     this.element.find('input').prop('value', formated);
@@ -377,6 +392,24 @@
                 this.hide();
             }
         },
+        
+        clickClear: function (e) {
+
+            this.date = null;            
+            this.set();
+            
+            this.element.trigger({
+                type: 'changeDate',
+                date: this.date,
+                viewMode: DPGlobal.modes[this.viewMode].clsName
+            });
+            
+            if (this.isInput) {
+                this.element.blur();
+            } else {
+                this.hide();
+            }
+        },
 
         mousedown: function (e) {
             e.stopPropagation();
@@ -388,6 +421,10 @@
                 this.viewMode = Math.max(this.minViewMode, Math.min(2, this.viewMode + dir));
             }
             this.picker.find('>div').hide().filter('.datepicker-' + DPGlobal.modes[this.viewMode].clsName).show();
+
+            if (this.nullable) {
+                this.picker.find('.clearLink').show();
+            }
         }
     };
 
@@ -480,7 +517,7 @@
                     }
                 }
             }
-            return date;
+            return date; 
         },
 
         formatDate: function (date, format) {
@@ -506,7 +543,8 @@
 								'<th class="next">&rsaquo;</th>' +
 							'</tr>' +
 						'</thead>',
-        contTemplate: '<tbody><tr><td colspan="7"></td></tr></tbody>'
+        contTemplate: '<tbody><tr><td colspan="7"></td></tr></tbody>',
+        clearTemplate: '<div class="clearLink">Clear</div>'
     };
 
     DPGlobal.template = '<div class="datepicker dropdown-menu">' +
@@ -529,5 +567,7 @@
 								'</table>' +
 							'</div>' +
 						'</div>';
+
+    
 
 } (window.jQuery)
