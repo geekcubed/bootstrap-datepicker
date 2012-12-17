@@ -8,45 +8,123 @@
 <body>
     <div class="container">
         <div class="row">
-            <div class="span9 columns">
-                <h2>
-                    Example</h2>
+            <div class="span10 offset1">
+                <h2>Examples</h2>
                 <p>
                     Attached to a field with the format specified via options.</p>
-                <div class="well">
-                    <input type="text" class="span2" value="02-16-2012" id="dp1">
+                <div class="row">
+                    <div class="offset1 span4">
+                        <h4>Normal</h4>
+                        <div class="well">
+                            <input type="text" class="span2" value="02-16-2012" id="dp1">
+                        </div>
+                    </div>
+                    <div class="offset1 span4">
+                        <h4>Nullable</h4>
+                        <div class="well">
+                            <input type="text" class="span2" value="" id="dp1Nullable">
+                        </div>
+                    </div>
                 </div>
+                <hr />
+
                 <p>
                     Attached to a field with the format specified via data tag.</p>
-                <div class="well">
-                    <input type="text" class="span2" value="02/16/12" data-date-format="mm/dd/yy" id="dp2">
+                <div class="row">
+                    <div class="offset1 span4">
+                        <h4>Normal</h4>
+                        <div class="well">
+                            <input type="text" class="span2" value="02/16/12" data-date-format="mm/dd/yy" id="dp2">
+                        </div>
+                    </div>
+                    <div class="offset1 span4">
+                        <h4>Nullable</h4>
+                        <div class="well">
+                            <input type="text" class="span2" value="" data-date-format="mm/dd/yy" data-date-nullable="true" id="dp2Nullable">
+                        </div>
+                    </div>
                 </div>
+                <hr />
+
                 <p>
                     As component.</p>
-                <div class="well">
-                    <div class="input-append date" id="dp3" data-date="12-02-2012" data-date-format="dd-mm-yyyy">
-                        <input class="span2" size="16" type="text" value="12-02-2012" readonly>
-                        <span class="add-on"><i class="icon-calendar"></i></span>
+                <div class="row">
+                    <div class="offset1 span4">
+                        <h4>Normal</h4>
+                        <div class="well">
+                            <div class="input-append date" id="dp3" data-date="12-02-2012" data-date-format="dd-mm-yyyy">
+                                <input class="span2" size="16" type="text" value="12-02-2012" readonly>
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="offset1 span4">
+                        <h4>Nullable</h4>
+                        <div class="well">
+                            <div class="input-append date" id="dp3Nullable" data-date="" data-date-format="dd-mm-yyyy">
+                                <input class="span2" size="16" type="text" value="" readonly>
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <hr />
+
                 <p>
                     Start with years viewMode.</p>
-                <div class="well">
-                    <div class="input-append date" id="dpYears" data-date="12-02-2012" data-date-format="dd-mm-yyyy"
-                        data-date-viewmode="years">
-                        <input class="span2" size="16" type="text" value="12-02-2012" readonly>
-                        <span class="add-on"><i class="icon-calendar"></i></span>
+                <div class="row">
+                    <div class="offset1 span4">
+                        <h4>Normal</h4>
+                        <div class="well">
+                            <div class="input-append date" id="dpYears" data-date="12-02-2012" data-date-format="dd-mm-yyyy"
+                                data-date-viewmode="years">
+                                <input class="span2" size="16" type="text" value="12-02-2012" readonly>
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="offset1 span4">
+                        <h4>Nullable</h4>
+                        <div class="well">
+                            <div class="input-append date" id="dpYearsNullable" data-date="" data-date-format="dd-mm-yyyy"
+                                data-date-viewmode="years">
+                                <input class="span2" size="16" type="text" value="" readonly>
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                <hr />
+
                 <p>
-                    Limit the view mode to months</p>
-                <div class="well">
-                    <div class="input-append date" id="dpMonths" data-date="102/2012" data-date-format="mm/yyyy"
-                        data-date-viewmode="years" data-date-minviewmode="months">
-                        <input class="span2" size="16" type="text" value="02/2012" readonly>
-                        <span class="add-on"><i class="icon-calendar"></i></span>
+                    Limit the view mode to months.</p>
+                <div class="row">
+                    <div class="offset1 span4">
+                        <h4>Normal</h4>
+                        <div class="well">
+                            <div class="input-append date" id="dpMonths" data-date="102/2012" data-date-format="mm/yyyy"
+                                data-date-viewmode="years" data-date-minviewmode="months">
+                                <input class="span2" size="16" type="text" value="02/2012" readonly>
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="offset1 span4">
+                        <h4>Nullable</h4>
+                        <div class="well">
+                            <div class="input-append date" id="dpMonthsNullable" data-date="" data-date-format="mm/yyyy"
+                                data-date-viewmode="years" data-date-minviewmode="months">
+                                <input class="span2" size="16" type="text" value="" readonly>
+                                <span class="add-on"><i class="icon-calendar"></i></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+<!--
+
                 <p>
                     Attached to other elment then field and using events to work with the date values.</p>
                 <div class="well">
@@ -76,8 +154,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
+        </div>-->
         <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.3.min.js"></script>
         <script src="../src/bootstrap-datepicker.js"></script>
         <script type="text/javascript">
@@ -92,7 +169,20 @@
                 $('#dpYears').datepicker();
                 $('#dpMonths').datepicker();
 
+                //Nullable
+                $('#dp1Nullable').datepicker({
+                    format: 'mm-dd-yyyy',
+                    nullable: true
+                });
+                $('#dp2Nullable').datepicker();
+                $('#dp3Nullable').datepicker({ nullable: true });
+                $('#dp3Nullable').datepicker({ nullable: true });
+                $('#dpYearsNullable').datepicker({ nullable: true });
+                $('#dpMonthsNullable').datepicker({ nullable: true });
 
+
+
+/*
                 var startDate = new Date(2012, 1, 20);
                 var endDate = new Date(2012, 1, 25);
                 $('#dp4').datepicker()
@@ -116,7 +206,7 @@
 				        $('#endDate').text($('#dp5').data('date'));
 				    }
 				    $('#dp5').datepicker('hide');
-				});
+				});*/
             });
  
         </script>
